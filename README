@@ -1,0 +1,50 @@
+NAME
+    Catalyst::Model::MongoDB - MongoDB model class for Catalyst
+
+SYNOPSIS
+        # model
+        __PACKAGE__->config(
+                    host => 'localhost',
+                    port => 27017,       
+        );
+
+        # controller
+        sub foo : Local {
+            my ($self, $c) = @_;
+
+            eval {
+                my @docs = $c->model('MyData')->mydatabase->mycollection->find();
+            };
+            ...
+        }
+
+DESCRIPTION
+    This model class exposes MongoDB::Connection as a Catalyst model.
+
+CONFIGURATION
+    You can pass the same configuration fields as when you make a new
+    MongoDB::Connection.
+
+METHODS
+  MongoDB
+    All the methods not handled locally are forwarded to
+    MongoDB::Connection.
+
+  new
+    Called from Catalyst.
+
+AUTHOR
+    Torsten Raudssus <torsten@raudssus.de>
+
+BUGS
+    Please report any bugs or feature requests to me on IRC Getty at
+    irc.perl.org, or make a pull request at
+    http://github.com/Getty/catalyst-model-mongodb
+
+COPYRIGHT & LICENSE
+    Copyright 2010 Torsten Raudssus, all rights reserved.
+
+    This library is free software; you can redistribute it and/or modify it
+    under the same terms as Perl itself, either Perl version 5.8.8 or, at
+    your option, any later version of Perl 5 you may have available.
+
