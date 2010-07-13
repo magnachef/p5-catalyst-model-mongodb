@@ -7,7 +7,7 @@ use NEXT;
 use Carp qw(confess);
 use MongoDB;
 
-our $VERSION = '0.01';
+our $VERSION = '0.03';
 
 sub new {
     my ($class, $c, $config) = @_;
@@ -15,7 +15,28 @@ sub new {
     $self->config($config);
 
     my $conf = $self->config;
-    $self->{mongodb_connection} = MongoDB::Connection->new($conf);
+	my $dbname;
+	my $collectionname;
+	if ($conf->{dbname}) {
+		$dbname = $conf->{dbname};
+		delete $conf->{dbname};
+	}
+	if ($conf->{collectionname}) {
+		$collectionname = $conf->{collectionname};
+		delete $conf->{collectionname};
+	}
+    my $connection = MongoDB::Connection->new($conf);
+	if ($dbname) {
+		my $database = $connection->$dbname;
+		if ($collectionname) {
+			my $collection = $database->$collectionname;
+			$self->{mongodb} = $collection;
+		} else {
+			$self->{mongodb} = $database;
+		}
+	} else {
+		$self->{mongodb} = $connection;
+	}
     $c->log->debug("MongoDB::Connection instantiated") if $c->debug;
 
     return $self;
@@ -28,7 +49,7 @@ sub AUTOLOAD {
 
     (my $meth = $AUTOLOAD) =~ s/^.*:://;
 
-    return $self->{mongodb_connection}->$meth(@args);
+    return $self->{mongodb}->$meth(@args);
 }
 
 
@@ -45,7 +66,46 @@ Catalyst::Model::MongoDB - MongoDB model class for Catalyst
     # model
     __PACKAGE__->config(
  		host => 'localhost',
-		port => 27017,       
+		port => 27017,
+		dbname => 'mydatabase',
+		collectionname => 'mycollection',
+    );
+
+    # controller
+    sub foo : Local {
+        my ($self, $c) = @_;
+
+        eval {
+            my @docs = $c->model('MyData')->find();
+        };
+        ...
+    }
+
+or
+
+    # model
+    __PACKAGE__->config(
+ 		host => 'localhost',
+		port => 27017,
+		dbname => 'mydatabase',
+    );
+
+    # controller
+    sub foo : Local {
+        my ($self, $c) = @_;
+
+        eval {
+            my @docs = $c->model('MyData')->mycollection->find();
+        };
+        ...
+    }
+
+or
+
+    # model
+    __PACKAGE__->config(
+ 		host => 'localhost',
+		port => 27017,
     );
 
     # controller
@@ -57,8 +117,7 @@ Catalyst::Model::MongoDB - MongoDB model class for Catalyst
         };
         ...
     }
-
-
+	
 =head1 DESCRIPTION
 
 This model class exposes L<MongoDB::Connection> as a Catalyst model.
