@@ -2,48 +2,37 @@ NAME
     Catalyst::Model::MongoDB - MongoDB model class for Catalyst
 
 SYNOPSIS
+        #
         # Config
         #
         <Model::MyModel>
-            hostname localhost
+            host localhost
             port 27017
             dbname mydatabase
+            collectionname preferedcollection
+            gridfs preferedgridfs
         </Model::MyModel>
 
-        # Model
         #
-        package MyApp::Model::MyModel;
-        use Moose;
-        use MooseX::Method::Signatures;
-        BEGIN { extends 'Catalyst::Model::MongoDB' };
-
-        method my_collection {
-            $self->dbh->get_collection('MyCollection');
-        }
-
-        method records($query = {}) {
-          $self->my_collection->query($query)->all;
-        }
-
-        method add($object = {}) {
-            # XXX: Figure out and add hex code for color automatically
-            $self->my_collection->insert($object);
-        }
-
-        method remove($where  = {}) {
-            $self->my_collection->remove($where);
-        }
-
-        method remove_all {
-            $self->my_collection->drop;
-        }
-
-        # Controller
+        # Usage
         #
-        $c->model('MyModel')->add({ name => 'Foo' });
-        $foo = $c->model('MyModel')->records({ name => 'Foo' });
-        @records = $c->model('MyModel')->records();
-        $c->model('MyModel')->remove({ name => 'Foo' });
+        $c->model('MyModel')->db                           # returns MongoDB::Connection->mydatabase
+        $c->model('MyModel')->db('otherdb')                # returns ->otherdb
+        $c->model('MyModel')->collection                   # returns ->mydatabase->preferedcollection
+        $c->model('MyModel')->coll                         # the same...
+        $c->model('MyModel')->c                            # the same...
+            $c->model('MyModel')->c('otherdb.othercollection') # returns ->otherdb->othercollection
+        $c->model('MyModel')->c('somecollection')          # returns ->mydatabase->somecollection
+        $c->model('MyModel')->gridfs                       # returns ->mydatabase->get_gridfs('preferedgridfs')
+        $c->model('MyModel')->g                            # the same...
+        $c->model('MyModel')->g('somegridfs')              # returns ->otherdb->get_gridfs('somegridfs')
+        $c->model('MyModel')->g('otherdb.othergridfs')     # returns ->otherdb->get_gridfs('othergridfs')
+
+        $c->model('MyModel')->run(...)                     # returns ->mydatabase->run_command(...)
+        $c->model('MyModel')->eval(...)                    # returns ->mydatabase->eval(...)
+
+        $c->model('MyModel')->database_names               # returns ->database_names
+        $c->model('MyModel')->dbnames                      # the same...
 
 DESCRIPTION
     This model class exposes MongoDB::Connection as a Catalyst model.
@@ -52,8 +41,12 @@ CONFIGURATION
     You can pass the same configuration fields as when you make a new
     MongoDB::Connection.
 
+    In addition you can also give a database name via dbname, a collection
+    name via collectioname or a gridfs name via gridfsname.
+
 METHODS
   dbnames
+=head2 database_names
     List of databases.
 
   oid
@@ -63,12 +56,13 @@ AUTHOR
     Torsten Raudssus <torsten@raudssus.de> Soren Dossing <netcom@sauber.net>
 
 BUGS
-    Please report any bugs or feature requests to me on IRC Getty at
-    irc.perl.org, or make a pull request at
+    Please report any bugs or feature requests on the github issue tracker
+    http://github.com/Getty/catalyst-model-mongodb/issues or to Getty on IRC
+    at irc.perl.org, or make a pull request at
     http://github.com/Getty/catalyst-model-mongodb
 
 COPYRIGHT & LICENSE
-    Copyright 2010 Torsten Raudssus, all rights reserved.
+    Copyright 2010 Torsten Raudssus & Soren Dossing, all rights reserved.
 
     This library is free software; you can redistribute it and/or modify it
     under the same terms as Perl itself, either Perl version 5.8.8 or, at
