@@ -1,57 +1,53 @@
 package Catalyst::Model::MongoDB;
-use base qw/Catalyst::Model/;
-use strict;
-use warnings;
-
-use NEXT;
-use Carp qw(confess);
 use MongoDB;
+use MongoDB::OID;
+use Moose;
 
-our $VERSION = '0.03';
+BEGIN { extends 'Catalyst::Model' }
 
-sub new {
-    my ($class, $c, $config) = @_;
-    my $self = $class->NEXT::new($c, $config);
-    $self->config($config);
+our $VERSION = '0.04';
 
-    my $conf = $self->config;
-	my $dbname;
-	my $collectionname;
-	if ($conf->{dbname}) {
-		$dbname = $conf->{dbname};
-		delete $conf->{dbname};
-	}
-	if ($conf->{collectionname}) {
-		$collectionname = $conf->{collectionname};
-		delete $conf->{collectionname};
-	}
-    my $connection = MongoDB::Connection->new($conf);
-	if ($dbname) {
-		my $database = $connection->$dbname;
-		if ($collectionname) {
-			my $collection = $database->$collectionname;
-			$self->{mongodb} = $collection;
-		} else {
-			$self->{mongodb} = $database;
-		}
-	} else {
-		$self->{mongodb} = $connection;
-	}
-    $c->log->debug("MongoDB::Connection instantiated") if $c->debug;
+has hostname => ( isa => 'Str', is => 'ro', default => 'localhost' );
+has port     => ( isa => 'Int', is => 'ro', default => 27017 );
+has dbname   => ( isa => 'Str', is => 'ro' );
 
-    return $self;
+has 'connection' => (
+    isa => 'MongoDB::Connection',
+    is => 'rw',
+    lazy_build => 1
+);
+
+has 'dbh' => (
+    isa => 'MongoDB::Database',
+    is => 'rw',
+    lazy_build => 1,
+);
+
+sub _build_connection {
+    my ($self) = @_;
+    return MongoDB::Connection->new(
+        host => $self->hostname,
+        port => $self->port,
+    );
 }
 
-sub AUTOLOAD {
-    my ($self, @args) = @_;
-    our $AUTOLOAD;
-    return if $AUTOLOAD =~ /::DESTROY$/;
-
-    (my $meth = $AUTOLOAD) =~ s/^.*:://;
-
-    return $self->{mongodb}->$meth(@args);
+sub _build_dbh {
+    my ($self) = @_;
+    return $self->connection->get_database($self->dbname);
 }
 
+sub dbnames {
+  MongoDB::Connection->new->database_names();
+}
+
+sub oid {
+  my($self, $_id) = @_;
+  return MongoDB::OID->new( value => $_id );
+}
+
+no Moose;
+
+__PACKAGE__->meta->make_immutable;
 
 1;
 
@@ -63,60 +59,49 @@ Catalyst::Model::MongoDB - MongoDB model class for Catalyst
 
 =head1 SYNOPSIS
 
-    # model
-    __PACKAGE__->config(
- 		host => 'localhost',
-		port => 27017,
-		dbname => 'mydatabase',
-		collectionname => 'mycollection',
-    );
+    # Config
+    #
+    <Model::MyModel>
+        hostname localhost
+        port 27017
+        dbname mydatabase
+    </Model::MyModel>
 
-    # controller
-    sub foo : Local {
-        my ($self, $c) = @_;
+    # Model
+    #
+    package MyApp::Model::MyModel;
+    use Moose;
+    use MooseX::Method::Signatures;
+    BEGIN { extends 'Catalyst::Model::MongoDB' };
 
-        eval {
-            my @docs = $c->model('MyData')->find();
-        };
-        ...
+    method my_collection {
+        $self->dbh->get_collection('MyCollection');
     }
 
-or
-
-    # model
-    __PACKAGE__->config(
- 		host => 'localhost',
-		port => 27017,
-		dbname => 'mydatabase',
-    );
-
-    # controller
-    sub foo : Local {
-        my ($self, $c) = @_;
-
-        eval {
-            my @docs = $c->model('MyData')->mycollection->find();
-        };
-        ...
+    method records($query = {}) {
+      $self->my_collection->query($query)->all;
     }
 
-or
-
-    # model
-    __PACKAGE__->config(
- 		host => 'localhost',
-		port => 27017,
-    );
-
-    # controller
-    sub foo : Local {
-        my ($self, $c) = @_;
-
-        eval {
-            my @docs = $c->model('MyData')->mydatabase->mycollection->find();
-        };
-        ...
+    method add($object = {}) {
+        # XXX: Figure out and add hex code for color automatically
+        $self->my_collection->insert($object);
     }
+
+    method remove($where  = {}) {
+        $self->my_collection->remove($where);
+    }
+
+    method remove_all {
+        $self->my_collection->drop;
+    }
+
+    # Controller
+    #
+    $c->model('MyModel')->add({ name => 'Foo' });
+    $foo = $c->model('MyModel')->records({ name => 'Foo' });
+    @records = $c->model('MyModel')->records();
+    $c->model('MyModel')->remove({ name => 'Foo' });
+
 	
 =head1 DESCRIPTION
 
@@ -128,17 +113,18 @@ You can pass the same configuration fields as when you make a new L<MongoDB::Con
 
 =head1 METHODS
 
-=head2 MongoDB
+=head2 dbnames
 
-All the methods not handled locally are forwarded to L<MongoDB::Connection>.
+List of databases.
 
-=head2 new
+=head2 oid
 
-Called from Catalyst.
+Creates MongoDB::OID object
 
 =head1 AUTHOR
 
 Torsten Raudssus <torsten@raudssus.de>
+Soren Dossing <netcom@sauber.net>
 
 =head1 BUGS 
 

@@ -1,50 +1,84 @@
-NAME
-    Catalyst::Model::MongoDB - MongoDB model class for Catalyst
+Catalyst::Model::MongoDUBs(e3r)Contributed Perl DocumentCaattiaolnyst::Model::MongoDB(3)
 
-SYNOPSIS
-        # model
-        __PACKAGE__->config(
-                    host => 'localhost',
-                    port => 27017,       
-        );
 
-        # controller
-        sub foo : Local {
-            my ($self, $c) = @_;
 
-            eval {
-                my @docs = $c->model('MyData')->mydatabase->mycollection->find();
-            };
-            ...
-        }
+NNAAMMEE
+       Catalyst::Model::MongoDB − MongoDB model class for Catalyst
 
-DESCRIPTION
-    This model class exposes MongoDB::Connection as a Catalyst model.
+SSYYNNOOPPSSIISS
+           # Config
+           #
+           <Model::MyModel>
+               hostname localhost
+               port 27017
+               dbname mydatabase
+           </Model::MyModel>
 
-CONFIGURATION
-    You can pass the same configuration fields as when you make a new
-    MongoDB::Connection.
+           # Model
+           #
+           package MyApp::Model::MyModel;
+           use Moose;
+           use MooseX::Method::Signatures;
+           BEGIN { extends 'Catalyst::Model::MongoDB' };
 
-METHODS
-  MongoDB
-    All the methods not handled locally are forwarded to
-    MongoDB::Connection.
+           method my_collection {
+               $self−>dbh−>get_collection('MyCollection');
+           }
 
-  new
-    Called from Catalyst.
+           method records($query = {}) {
+             $self−>my_collection−>query($query)−>all;
+           }
 
-AUTHOR
-    Torsten Raudssus <torsten@raudssus.de>
+           method add($object = {}) {
+               # XXX: Figure out and add hex code for color automatically
+               $self−>my_collection−>insert($object);
+           }
 
-BUGS
-    Please report any bugs or feature requests to me on IRC Getty at
-    irc.perl.org, or make a pull request at
-    http://github.com/Getty/catalyst-model-mongodb
+           method remove($where  = {}) {
+               $self−>my_collection−>remove($where);
+           }
 
-COPYRIGHT & LICENSE
-    Copyright 2010 Torsten Raudssus, all rights reserved.
+           method remove_all {
+               $self−>my_collection−>drop;
+           }
 
-    This library is free software; you can redistribute it and/or modify it
-    under the same terms as Perl itself, either Perl version 5.8.8 or, at
-    your option, any later version of Perl 5 you may have available.
+           # Controller
+           #
+           $c−>model('MyModel')−>add({ name => 'Foo' });
+           $foo = $c−>model('MyModel')−>records({ name => 'Foo' });
+           @records = $c−>model('MyModel')−>records();
+           $c−>model('MyModel')−>remove({ name => 'Foo' });
 
+DDEESSCCRRIIPPTTIIOONN
+       This model class exposes MongoDB::Connection as a Catalyst model.
+
+CCOONNFFIIGGUURRAATTIIOONN
+       You can pass the same configuration fields as when you make a new
+       MongoDB::Connection.
+
+MMEETTHHOODDSS
+   ddbbnnaammeess
+       List of databases.
+
+   ooiidd
+       Creates MongoDB::OID object
+
+AAUUTTHHOORR
+       Torsten Raudssus <torsten@raudssus.de> Soren Dossing
+       <netcom@sauber.net>
+
+BBUUGGSS
+       Please report any bugs or feature requests to me on IRC Getty at
+       irc.perl.org, or make a pull request at
+       http://github.com/Getty/catalyst−model−mongodb
+
+CCOOPPYYRRIIGGHHTT && LLIICCEENNSSEE
+       Copyright 2010 Torsten Raudssus, all rights reserved.
+
+       This library is free software; you can redistribute it and/or modify it
+       under the same terms as Perl itself, either Perl version 5.8.8 or, at
+       your option, any later version of Perl 5 you may have available.
+
+
+
+perl v5.12.0                      2010‐07‐14       Catalyst::Model::MongoDB(3)

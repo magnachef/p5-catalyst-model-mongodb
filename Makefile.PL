@@ -6,7 +6,8 @@ perl_version '5.008';
 license 'perl';
 all_from 'lib/Catalyst/Model/MongoDB.pm';
 
-requires 'Catalyst';
+requires 'Catalyst::Model';
 requires 'MongoDB';
+requires 'Moose';
 
 WriteAll;
