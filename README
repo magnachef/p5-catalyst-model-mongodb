@@ -46,8 +46,40 @@ CONFIGURATION
 
 METHODS
   dbnames
-=head2 database_names
+  database_names
     List of databases.
+
+  collnames
+  collection_names
+    List of collection names of the default database. You cant give other
+    database names here, if you need this please do:
+
+      $c->model('MyModel')->db('otherdatabase')->collection_names
+
+  collection
+  coll
+  c
+    Gives back a MongoDB::Collection, you can also directly access other dbs
+    collections, with "otherdb.othercollection". If no collectionname is
+    given he uses the default collectionname given on config.
+
+  gridfs
+  g
+    Gives back a MongoDB::GridFS. If no gridfsname is given, he uses the
+    default gridfsname given on config.
+
+  run
+    Run a command via MongoDB::Database->run_command on the default
+    database. You cant give other database names here, if you need this
+    please do:
+
+      $c->model('MyModel')->db('otherdatabase')->run_command(...)
+
+  eval
+    Eval code via MongoDB::Database->eval on the default database. You cant
+    give other database names here, if you need this please do:
+
+      $c->model('MyModel')->db('otherdatabase')->eval(...)
 
   oid
     Creates MongoDB::OID object
@@ -57,8 +89,8 @@ AUTHOR
 
 BUGS
     Please report any bugs or feature requests on the github issue tracker
-    http://github.com/Getty/catalyst-model-mongodb/issues or to Getty on IRC
-    at irc.perl.org, or make a pull request at
+    http://github.com/Getty/catalyst-model-mongodb/issues or to Getty or
+    sauber on IRC at irc.perl.org, or make a pull request at
     http://github.com/Getty/catalyst-model-mongodb
 
 COPYRIGHT & LICENSE

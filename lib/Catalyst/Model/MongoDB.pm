@@ -78,6 +78,7 @@ sub eval {
   $self->db->eval(@params);
 }
 
+sub collnames { shift->collection_names(@_) }
 sub collection_names {
   my ( $self, @params ) = @_;
   confess "no dbname given via config" if !$self->dbname;
@@ -158,7 +159,8 @@ Catalyst::Model::MongoDB - MongoDB model class for Catalyst
 
     $c->model('MyModel')->database_names               # returns ->database_names
     $c->model('MyModel')->dbnames                      # the same...
-	
+
+
 =head1 DESCRIPTION
 
 This model class exposes L<MongoDB::Connection> as a Catalyst model.
@@ -173,9 +175,47 @@ a gridfs name via gridfsname.
 =head1 METHODS
 
 =head2 dbnames
+
 =head2 database_names
 
 List of databases.
+
+=head2 collnames
+
+=head2 collection_names
+
+List of collection names of the default database. You cant give other database names here, if you need this please do:
+
+  $c->model('MyModel')->db('otherdatabase')->collection_names
+
+=head2 collection
+
+=head2 coll
+
+=head2 c
+
+Gives back a MongoDB::Collection, you can also directly access other dbs collections, with "otherdb.othercollection".
+If no collectionname is given he uses the default collectionname given on config.
+
+=head2 gridfs
+
+=head2 g
+
+Gives back a MongoDB::GridFS. If no gridfsname is given, he uses the default gridfsname given on config.
+
+=head2 run
+
+Run a command via MongoDB::Database->run_command on the default database. You cant give other database names here,
+if you need this please do:
+
+  $c->model('MyModel')->db('otherdatabase')->run_command(...)
+
+=head2 eval
+
+Eval code via MongoDB::Database->eval on the default database. You cant give other database names here,
+if you need this please do:
+
+  $c->model('MyModel')->db('otherdatabase')->eval(...)
 
 =head2 oid
 
@@ -189,7 +229,7 @@ Soren Dossing <netcom@sauber.net>
 =head1 BUGS 
 
 Please report any bugs or feature requests on the github issue tracker http://github.com/Getty/catalyst-model-mongodb/issues
-or to Getty on IRC at irc.perl.org, or make a pull request at http://github.com/Getty/catalyst-model-mongodb
+or to Getty or sauber on IRC at irc.perl.org, or make a pull request at http://github.com/Getty/catalyst-model-mongodb
 
 =head1 COPYRIGHT & LICENSE 
 
