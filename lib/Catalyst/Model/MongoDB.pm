@@ -150,7 +150,7 @@ Catalyst::Model::MongoDB - MongoDB model class for Catalyst
     $c->model('MyModel')->c('somecollection')          # returns ->mydatabase->somecollection
     $c->model('MyModel')->gridfs                       # returns ->mydatabase->get_gridfs('preferedgridfs')
     $c->model('MyModel')->g                            # the same...
-    $c->model('MyModel')->g('somegridfs')              # returns ->otherdb->get_gridfs('somegridfs')
+    $c->model('MyModel')->g('somegridfs')              # returns ->mydatabase->get_gridfs('somegridfs')
     $c->model('MyModel')->g('otherdb.othergridfs')     # returns ->otherdb->get_gridfs('othergridfs')
 
     $c->model('MyModel')->run(...)                     # returns ->mydatabase->run_command(...)
