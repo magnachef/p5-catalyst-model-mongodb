@@ -7,47 +7,115 @@ BEGIN { extends 'Catalyst::Model' }
 
 our $VERSION = '0.04';
 
-has hostname => ( isa => 'Str', is => 'ro', default => 'localhost' );
-has port     => ( isa => 'Int', is => 'ro', default => 27017 );
-has dbname   => ( isa => 'Str', is => 'ro' );
+has host           => ( isa => 'Str', is => 'ro', required => 1, default => sub { 'localhost' } );
+has port           => ( isa => 'Int', is => 'ro', required => 1, default => sub { 27017 } );
+has dbname         => ( isa => 'Str', is => 'ro' );
+has collectionname => ( isa => 'Str', is => 'ro' );
+has gridfsname     => ( isa => 'Str', is => 'ro' );
 
 has 'connection' => (
-    isa => 'MongoDB::Connection',
-    is => 'rw',
-    lazy_build => 1
-);
-
-has 'dbh' => (
-    isa => 'MongoDB::Database',
-    is => 'rw',
-    lazy_build => 1,
+  isa => 'MongoDB::Connection',
+  is => 'rw',
+  lazy_build => 1,
 );
 
 sub _build_connection {
-    my ($self) = @_;
-    return MongoDB::Connection->new(
-        host => $self->hostname,
-        port => $self->port,
-    );
+  my ($self) = @_;
+  return MongoDB::Connection->new(
+    host => $self->host,
+    port => $self->port,
+  );
 }
 
-sub _build_dbh {
-    my ($self) = @_;
-    return $self->connection->get_database($self->dbname);
+has 'dbs' => (
+  isa => 'HashRef[MongoDB::Database]',
+  is => 'rw',
+  default => sub {{}},
+);
+
+sub db {
+  my ( $self, $dbname ) = @_;
+  $dbname = $self->dbname if !$dbname;
+  confess "no dbname given via parameter or config" if !$dbname;
+  if (!$self->dbs->{$dbname}) {
+    $self->dbs->{$dbname} = $self->connection->get_database($dbname);
+  }
+  return $self->dbs->{$dbname};
 }
 
-sub dbnames {
-  MongoDB::Connection->new->database_names();
+sub c { shift->collection(@_) }
+sub coll { shift->collection(@_) }
+sub collection {
+  my ( $self, $param ) = @_;
+  my $dbname;
+  my $collname;
+  my @params = split(/\./,$param);
+  if (@params > 1) {
+	$dbname = $params[0];
+	$collname = $params[1];
+  } else {
+    $dbname = $self->dbname;
+	if (@params == 1) {
+      $collname = $params[0];
+	} else {
+      $collname = $self->collectionname;
+	}
+  }
+  confess "no dbname given via parameter or config" if !$dbname;
+  confess "no collectionname given via parameter or config" if !$collname;
+  $self->db($dbname)->get_collection($collname);
+}
+
+sub run {
+  my ( $self, @params ) = @_;
+  confess "no dbname given via config" if !$self->dbname;
+  $self->db->run_command(@params);
+}
+
+sub eval {
+  my ( $self, @params ) = @_;
+  confess "no dbname given via config" if !$self->dbname;
+  $self->db->eval(@params);
+}
+
+sub collection_names {
+  my ( $self, @params ) = @_;
+  confess "no dbname given via config" if !$self->dbname;
+  $self->db->collection_names(@params);
+}
+
+sub g { shift->gridfs(@_) }
+sub gridfs {
+  my ( $self, $param ) = @_;
+  my $dbname;
+  my $gridfsname;
+  my @params = split(/\./,$param);
+  if (@params > 1) {
+	$dbname = $params[0];
+	$gridfsname = $params[1];
+  } else {
+    $dbname = $self->dbname;
+	if (@params == 1) {
+      $gridfsname = $params[0];
+	} else {
+      $gridfsname = $self->gridfsname;
+	}
+  }
+  confess "no dbname given via parameter or config" if !$dbname;
+  confess "no gridfsname given via parameter or config" if !$gridfsname;
+  $self->db($dbname)->get_gridfs($gridfsname);
+}
+
+sub dbnames { shift->database_names(@_) }
+sub database_names {
+  my ( $self ) = @_;
+  $self->connection->database_names;
 }
 
 sub oid {
-  my($self, $_id) = @_;
+  my( $self, $_id ) = @_;
   return MongoDB::OID->new( value => $_id );
 }
-
-no Moose;
-
-__PACKAGE__->meta->make_immutable;
 
 1;
 
@@ -59,49 +127,37 @@ Catalyst::Model::MongoDB - MongoDB model class for Catalyst
 
 =head1 SYNOPSIS
 
+    #
     # Config
     #
     <Model::MyModel>
-        hostname localhost
+        host localhost
         port 27017
         dbname mydatabase
+        collectionname preferedcollection
+        gridfs preferedgridfs
     </Model::MyModel>
 
-    # Model
     #
-    package MyApp::Model::MyModel;
-    use Moose;
-    use MooseX::Method::Signatures;
-    BEGIN { extends 'Catalyst::Model::MongoDB' };
-
-    method my_collection {
-        $self->dbh->get_collection('MyCollection');
-    }
-
-    method records($query = {}) {
-      $self->my_collection->query($query)->all;
-    }
-
-    method add($object = {}) {
-        # XXX: Figure out and add hex code for color automatically
-        $self->my_collection->insert($object);
-    }
-
-    method remove($where  = {}) {
-        $self->my_collection->remove($where);
-    }
-
-    method remove_all {
-        $self->my_collection->drop;
-    }
-
-    # Controller
+    # Usage
     #
-    $c->model('MyModel')->add({ name => 'Foo' });
-    $foo = $c->model('MyModel')->records({ name => 'Foo' });
-    @records = $c->model('MyModel')->records();
-    $c->model('MyModel')->remove({ name => 'Foo' });
+    $c->model('MyModel')->db                           # returns MongoDB::Connection->mydatabase
+    $c->model('MyModel')->db('otherdb')                # returns ->otherdb
+    $c->model('MyModel')->collection                   # returns ->mydatabase->preferedcollection
+    $c->model('MyModel')->coll                         # the same...
+    $c->model('MyModel')->c                            # the same...
+	$c->model('MyModel')->c('otherdb.othercollection') # returns ->otherdb->othercollection
+    $c->model('MyModel')->c('somecollection')          # returns ->mydatabase->somecollection
+    $c->model('MyModel')->gridfs                       # returns ->mydatabase->get_gridfs('preferedgridfs')
+    $c->model('MyModel')->g                            # the same...
+    $c->model('MyModel')->g('somegridfs')              # returns ->otherdb->get_gridfs('somegridfs')
+    $c->model('MyModel')->g('otherdb.othergridfs')     # returns ->otherdb->get_gridfs('othergridfs')
 
+    $c->model('MyModel')->run(...)                     # returns ->mydatabase->run_command(...)
+    $c->model('MyModel')->eval(...)                    # returns ->mydatabase->eval(...)
+
+    $c->model('MyModel')->database_names               # returns ->database_names
+    $c->model('MyModel')->dbnames                      # the same...
 	
 =head1 DESCRIPTION
 
@@ -111,9 +167,13 @@ This model class exposes L<MongoDB::Connection> as a Catalyst model.
 
 You can pass the same configuration fields as when you make a new L<MongoDB::Connection>.
 
+In addition you can also give a database name via dbname, a collection name via collectioname or 
+a gridfs name via gridfsname.
+
 =head1 METHODS
 
 =head2 dbnames
+=head2 database_names
 
 List of databases.
 
@@ -128,12 +188,12 @@ Soren Dossing <netcom@sauber.net>
 
 =head1 BUGS 
 
-Please report any bugs or feature requests to me on IRC Getty at irc.perl.org, or make a pull request
-at http://github.com/Getty/catalyst-model-mongodb
+Please report any bugs or feature requests on the github issue tracker http://github.com/Getty/catalyst-model-mongodb/issues
+or to Getty on IRC at irc.perl.org, or make a pull request at http://github.com/Getty/catalyst-model-mongodb
 
 =head1 COPYRIGHT & LICENSE 
 
-Copyright 2010 Torsten Raudssus, all rights reserved.
+Copyright 2010 Torsten Raudssus & Soren Dossing, all rights reserved.
 
 This library is free software; you can redistribute it and/or modify it under the same terms as 
 Perl itself, either Perl version 5.8.8 or, at your option, any later version of Perl 5 you may 

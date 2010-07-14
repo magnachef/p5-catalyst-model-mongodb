@@ -12,7 +12,7 @@ Catalyst::Helper::Model::MongoDB - Helper for MongoDB models
 
 =head1 SYNOPSIS
 
- script/myapp_create.pl model MyModel MongoDB uri
+  script/myapp_create.pl model MyModel MongoDB uri
 
 =head1 DESCRIPTION
 
@@ -74,9 +74,8 @@ __DATA__
 __modelclass__
 package [% class %];
 
-use strict;
-use warnings;
-use base 'Catalyst::Model::MongoDB';
+use Moose;
+BEGIN { extends 'Catalyst::Model::MongoDB' };
 
 __PACKAGE__->config(
 );
@@ -103,6 +102,9 @@ This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself.
 
 =cut
+
+no Moose;
+__PACKAGE__->meta->make_immutable;
 
 1;
 __modeltest__
