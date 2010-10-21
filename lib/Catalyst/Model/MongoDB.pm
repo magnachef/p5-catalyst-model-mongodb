@@ -5,7 +5,7 @@ use Moose;
 
 BEGIN { extends 'Catalyst::Model' }
 
-our $VERSION = '0.05';
+our $VERSION = '0.06';
 
 has host           => ( isa => 'Str', is => 'ro', required => 1, default => sub { 'localhost' } );
 has port           => ( isa => 'Int', is => 'ro', required => 1, default => sub { 27017 } );
