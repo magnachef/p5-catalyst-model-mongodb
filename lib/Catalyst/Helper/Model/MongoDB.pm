@@ -46,14 +46,30 @@ sub mk_comptest {
 
 =pod
 
+=head1 SUPPORT
+
+IRC
+
+  Join #catalyst on irc.perl.org and ask for Getty.
+
+Repository
+
+  http://github.com/Getty/p5-catalyst-model-mongodb
+  Pull request and additional contributors are welcome
+ 
+Issue Tracker
+
+  http://github.com/Getty/p5-catalyst-model-mongodb/issues
+
 =head1 AUTHOR
 
 Torsten Raudssus <torsten@raudssus.de>
+Soren Dossing <netcom@sauber.net>
 
 =head1 BUGS 
 
-Please report any bugs or feature requests to me on IRC Getty at irc.perl.org, or make a pull request
-at http://github.com/Getty/catalyst-model-mongodb
+Please report any bugs or feature requests on the github issue tracker http://github.com/Getty/p5-catalyst-model-mongodb/issues
+or to Getty or sauber on IRC at irc.perl.org, or make a pull request at http://github.com/Getty/cp5-catalyst-model-mongodb
 
 =head1 COPYRIGHT & LICENSE 
 

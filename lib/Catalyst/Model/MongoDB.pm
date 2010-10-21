@@ -243,8 +243,8 @@ Soren Dossing <netcom@sauber.net>
 
 =head1 BUGS 
 
-Please report any bugs or feature requests on the github issue tracker http://github.com/Getty/catalyst-model-mongodb/issues
-or to Getty or sauber on IRC at irc.perl.org, or make a pull request at http://github.com/Getty/catalyst-model-mongodb
+Please report any bugs or feature requests on the github issue tracker http://github.com/Getty/p5-catalyst-model-mongodb/issues
+or to Getty or sauber on IRC at irc.perl.org, or make a pull request at http://github.com/Getty/cp5-catalyst-model-mongodb
 
 =head1 COPYRIGHT & LICENSE 
 
