@@ -6,9 +6,8 @@ perl_version '5.008';
 license 'perl';
 all_from 'lib/Catalyst/Model/MongoDB.pm';
 
-requires 'Catalyst::Runtime';
+requires 'Catalyst::Runtime' => 5.80;
 requires 'MongoDB';
-requires 'Moose';
 
 test_requires 'Test::More' => '0.47';
 
