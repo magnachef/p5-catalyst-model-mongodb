@@ -2,6 +2,8 @@ package Catalyst::Helper::Model::MongoDB;
 use strict;
 use warnings;
 
+our $VERSION = '0.05';
+
 =pod
 
 =head1 NAME
