@@ -2,8 +2,6 @@ package Catalyst::Helper::Model::MongoDB;
 use strict;
 use warnings;
 
-our $VERSION = '0.04';
-
 =pod
 
 =head1 NAME
@@ -12,7 +10,7 @@ Catalyst::Helper::Model::MongoDB - Helper for MongoDB models
 
 =head1 SYNOPSIS
 
-  script/myapp_create.pl model MyModel MongoDB uri
+  script/myapp_create.pl model MyModel MongoDB [host] [port] [dbname] [collectionname] [gridfs]
 
 =head1 DESCRIPTION
 
@@ -33,9 +31,17 @@ Makes tests.
 =cut
 
 sub mk_compclass {
-    my ($self, $helper) = @_;
+    my ( $self, $helper, $host, $port, $dbname, $collectionname, $gridfs ) = @_;
 
-    $helper->render_file('modelclass', $helper->{file});
+	my %args = (
+		host => $host,
+		port => $port,
+		dbname => $dbname,
+		collectionname => $collectionname,
+		gridfs => $gridfs,
+	);
+	
+    $helper->render_file('modelclass', $helper->{file}, \%args);
     return 1;
 }
 
@@ -69,7 +75,7 @@ Soren Dossing <netcom@sauber.net>
 =head1 BUGS 
 
 Please report any bugs or feature requests on the github issue tracker http://github.com/Getty/p5-catalyst-model-mongodb/issues
-or to Getty or sauber on IRC at irc.perl.org, or make a pull request at http://github.com/Getty/cp5-catalyst-model-mongodb
+or to Getty or sauber on IRC at irc.perl.org, or make a pull request at http://github.com/Getty/p5-catalyst-model-mongodb
 
 =head1 COPYRIGHT & LICENSE 
 
@@ -94,6 +100,11 @@ use Moose;
 BEGIN { extends 'Catalyst::Model::MongoDB' };
 
 __PACKAGE__->config(
+	host => '[% host || 'localhost' %]',
+	port => '[% port || '27017' %]',
+	dbname => '[% dbname %]',
+	collectionname => '[% collectionname %]',
+	gridfs => '[% gridfs %]',
 );
 
 =head1 NAME
