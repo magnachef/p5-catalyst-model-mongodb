@@ -1,14 +1,9 @@
 package Catalyst::Helper::Model::MongoDB;
+# ABSTRACT: Helper for MongoDB models
 use strict;
 use warnings;
 
-our $VERSION = '0.06';
-
 =pod
-
-=head1 NAME
-
-Catalyst::Helper::Model::MongoDB - Helper for MongoDB models
 
 =head1 SYNOPSIS
 
@@ -68,24 +63,6 @@ Repository
 Issue Tracker
 
   http://github.com/Getty/p5-catalyst-model-mongodb/issues
-
-=head1 AUTHOR
-
-Torsten Raudssus <torsten@raudssus.de>
-Soren Dossing <netcom@sauber.net>
-
-=head1 BUGS 
-
-Please report any bugs or feature requests on the github issue tracker http://github.com/Getty/p5-catalyst-model-mongodb/issues
-or to Getty or sauber on IRC at irc.perl.org, or make a pull request at http://github.com/Getty/p5-catalyst-model-mongodb
-
-=head1 COPYRIGHT & LICENSE 
-
-Copyright 2010 Torsten Raudssus, all rights reserved.
-
-This library is free software; you can redistribute it and/or modify it under the same terms as 
-Perl itself, either Perl version 5.8.8 or, at your option, any later version of Perl 5 you may 
-have available.
 
 =cut
 

@@ -1,4 +1,5 @@
 package Catalyst::Model::MongoDB;
+# ABSTRACT: MongoDB model class for Catalyst
 use MongoDB;
 use MongoDB::OID;
 use Moose;
@@ -122,10 +123,6 @@ sub oid {
 
 =pod
 
-=head1 NAME
-
-Catalyst::Model::MongoDB - MongoDB model class for Catalyst
-
 =head1 SYNOPSIS
 
     #
@@ -235,23 +232,5 @@ Repository
 Issue Tracker
 
   http://github.com/Getty/p5-catalyst-model-mongodb/issues
-
-=head1 AUTHOR
-
-Torsten Raudssus <torsten@raudssus.de>
-Soren Dossing <netcom@sauber.net>
-
-=head1 BUGS 
-
-Please report any bugs or feature requests on the github issue tracker http://github.com/Getty/p5-catalyst-model-mongodb/issues
-or to Getty or sauber on IRC at irc.perl.org, or make a pull request at http://github.com/Getty/cp5-catalyst-model-mongodb
-
-=head1 COPYRIGHT & LICENSE 
-
-Copyright 2010 Torsten Raudssus & Soren Dossing, all rights reserved.
-
-This library is free software; you can redistribute it and/or modify it under the same terms as 
-Perl itself, either Perl version 5.8.8 or, at your option, any later version of Perl 5 you may 
-have available.
 
 =cut
