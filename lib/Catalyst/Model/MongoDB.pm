@@ -6,13 +6,15 @@ use Moose;
 
 BEGIN { extends 'Catalyst::Model' }
 
-our $VERSION = '0.06';
+our $VERSION = '0.08';
 
 has host           => ( isa => 'Str', is => 'ro', required => 1, default => sub { 'localhost' } );
 has port           => ( isa => 'Int', is => 'ro', required => 1, default => sub { 27017 } );
 has dbname         => ( isa => 'Str', is => 'ro' );
 has collectionname => ( isa => 'Str', is => 'ro' );
 has gridfsname     => ( isa => 'Str', is => 'ro' );
+has username       => ( isa => 'Str', is => 'ro', default => sub { '' } );
+has password       => ( isa => 'Str', is => 'ro', default => sub { '' } );
 
 has 'connection' => (
   isa => 'MongoDB::Connection',
@@ -23,8 +25,11 @@ has 'connection' => (
 sub _build_connection {
   my ($self) = @_;
   return MongoDB::Connection->new(
-    host => $self->host,
-    port => $self->port,
+    host     => $self->host,
+    port     => $self->port,
+    db_name  => $self->dbname,
+    username => $self->username,
+    password => $self->password,
   );
 }
 
@@ -132,6 +137,8 @@ sub oid {
         host localhost
         port 27017
         dbname mydatabase
+        username myuser
+        password mypass
         collectionname preferedcollection
         gridfs preferedgridfs
     </Model::MyModel>
